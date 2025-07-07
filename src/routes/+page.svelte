@@ -12,7 +12,7 @@
 </script>
 
 <main class="container">
-  <h1>Welcome to Tauri + Svelte</h1>
+  <!-- <h1>Welcome to Tauri + Svelte</h1>
 
   <div class="row">
     <a href="https://vite.dev" target="_blank">
@@ -31,7 +31,10 @@
     <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
     <button type="submit">Greet</button>
   </form>
-  <p>{greetMsg}</p>
+  <p>{greetMsg}</p> -->
+
+<a href="/day/2024-01-15">Day</a>
+<a href="/month/2024-01">Month</a>
 </main>
 
 <style>
