@@ -1,8 +1,8 @@
 <div>
     <div>
-        <button onclick={() => go_back()}>&lt</button>
-        <p>{day}</p>
-        <button onclick={() => go_forward()}>&gt</button>
+        <button onclick={go_back}>&lt</button>
+        <p>{page.params.date}</p>
+        <button onclick={go_forward}>&gt</button>
     </div>
     <div>
         <p>Home 6/10</p>
@@ -15,15 +15,27 @@
 
     import { goto } from "$app/navigation";
     import { page } from '$app/state'; 
+    import type { DateLoc } from '$lib/models'
+    import { generateMockData} from "$lib/models"
+    console.log(generateMockData(new Date().toISOString(), 30))
 
-    $: day = page.params.date;
-
-
-    function go_back() {
-        goto("/day/2025-01-01")
-        
+    async function go_back() {
+        console.log("going backward")
+        let currentDate = new Date(page.params.date);
+        let yesterday = new Date(page.params.date)
+        yesterday.setDate(currentDate.getDate() - 1)
+        let yesterdayStr = yesterday.toISOString().split('T')[0]
+        console.log(yesterdayStr)
+        await goto(`/day/${yesterdayStr}`)
     }
-    function go_forward() {
+    async function go_forward() {
+        console.log("going forward")
+        let currentDate = new Date(page.params.date);
+        let tomorrow = new Date(page.params.date)
+        tomorrow.setDate(currentDate.getDate() + 1)
+        let tomorrowStr = tomorrow.toISOString().split('T')[0]
+        console.log(tomorrowStr)
+        await goto(`/day/${tomorrowStr}`)
         
     }
 </script>
