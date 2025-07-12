@@ -1,7 +1,7 @@
 <div>
     <div>
         <button onclick={go_back}>&lt</button>
-        <p>{page.params.date}</p>
+        <button onclick={go_up}>{page.params.date}</button>
         <button onclick={go_forward}>&gt</button>
     </div>
     <div>
@@ -19,6 +19,12 @@
     import { generateMockData} from "$lib/models"
     console.log(generateMockData(new Date().toISOString(), 30))
 
+    async function go_up() {
+        console.log("going up")
+        let currentDate = new Date(page.params.date);
+        let route = `${currentDate.getFullYear()}-${currentDate.getMonth()}`
+        await goto(`/month/${route}`)
+    }
     async function go_back() {
         console.log("going backward")
         let currentDate = new Date(page.params.date);
