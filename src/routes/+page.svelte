@@ -1,6 +1,9 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
-  let today = new Date().toISOString().split('T')[0];
+  // import { invoke } from "@tauri-apps/api/core";
+    import type {PageProps} from "./$types";
+  let today = new Date().toISOString().split("T")[0];
+  let {data} : PageProps = $props();
+
 </script>
 
 <main class="container">

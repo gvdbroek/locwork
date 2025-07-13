@@ -1,19 +1,23 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { type DateLoc } from "$lib/models";
-  export let cellData: DateLoc;
+  let { cellData }: { cellData: DateLoc } = $props();
 
-  let location = "unknown";
-  if (cellData.working == false) {
-    location = "nowork";
-  } else {
-    if (cellData.location == "home") {
-      location = "home";
+  let location = $derived(getCellLocation());
+
+  function getCellLocation() {
+    let _loc: string;
+    if (cellData.working === false) {
+      _loc = "nowork";
     } else {
-      location = "office";
+      if (cellData.location === "home") {
+        _loc = "home";
+      } else {
+        _loc = "office";
+      }
     }
+    return _loc;
   }
-
   async function go_to_date() {
     await goto(`/day/${cellData.date}`);
   }
@@ -33,18 +37,13 @@
     display: inline-block;
     text-align: right;
     position: relative;
-
-
   }
 
-  .notthismonth {
-    opacity: 0.5;
-  }
   .dateday {
     position: absolute;
     font-size: xx-small;
-    top:0;
-    right:0;
+    top: 0;
+    right: 0;
     padding: 5px;
     opacity: 0.5;
   }
@@ -54,7 +53,7 @@
     top: 60%;
     transform: translate(-50%, -50%);
     width: 1em;
-    height: .75em;
+    height: 0.75em;
     border-radius: 2px;
     /* margin-left: 10px; */
     /* margin-bottom: 5px; */

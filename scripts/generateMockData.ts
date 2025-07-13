@@ -1,4 +1,6 @@
 
+import fs from 'fs'
+
 export interface DateLoc {
     date: string;
     location: string;
@@ -26,8 +28,8 @@ export function generateMockDateLoc(date: Date, locations: string[]) {
 
 }
 
-export function generateMockData(startDate: string, numDays: 30): DateLoc[] {
-    const locations = ["home", "work", "otherwork"]
+export function generateMockData(startDate: string, numDays: number): DateLoc[] {
+    const locations = ["home", "office", "otherwork"]
 
     let mockData: DateLoc[] = [];
     for (let index = 0; index < numDays; index++) {
@@ -41,3 +43,14 @@ export function generateMockData(startDate: string, numDays: 30): DateLoc[] {
     return mockData;
 
 }
+
+function main(){
+    const count = 365;
+    const p = "./mock/records.json"
+    console.log(`Generating ${count} elements of mock data in ${p}`)
+
+    let data = generateMockData("2025-08-10", count)
+    fs.writeFileSync(p, JSON.stringify(data))
+
+}
+main();
