@@ -29,6 +29,19 @@
 </button>
 
 <style>
+  button{
+      border: 1px solid transparent;
+      transition: box-shadow 0.5s;  /* Always active */
+      box-shadow: 0 0 5px transparent;
+  }
+
+  button:hover{
+  box-shadow: 0 0 5px var(--primary-color);
+ cursor: pointer; 
+  transition: box-shadow 0.05s;
+  border-color: var(--primary-color);
+  border: 1px solid transparent;
+  }
   .cell {
     /* padding: 0.5em; */
     padding: 0%;
@@ -37,6 +50,10 @@
     display: inline-block;
     text-align: right;
     position: relative;
+    background-color: transparent;
+    outline: none;
+    box-shadow: none;
+    border: none;
   }
 
   .dateday {
@@ -46,6 +63,7 @@
     right: 0;
     padding: 5px;
     opacity: 0.5;
+    color: var(--text-color)
   }
   .loc {
     position: absolute;
@@ -59,15 +77,15 @@
     /* margin-bottom: 5px; */
   }
   .nowork {
-    background-color: rgb(56, 56, 56);
+    background-color: var(--nowork-color);
   }
   .office {
-    background-color: yellow;
+    background-color: var(--office-color);
   }
   .home {
-    background-color: yellowgreen;
+    background-color: var(--home-color);
   }
   .unknown {
-    background-color: grey;
+    background-color: var(--unknown-color);
   }
 </style>

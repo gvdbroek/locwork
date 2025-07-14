@@ -6,7 +6,7 @@
     getPreviousMonth,
     getDateString,
     NewUTCDDate,
-    WrapNumber
+    WrapNumber,
   } from "$lib/utils";
 
   import CalendarCell from "./CalendarCell.svelte";
@@ -80,66 +80,89 @@
   ) {
     const row = weekno;
     const col = weekday;
-    const baseDate = NewUTCDDate(year, month, 1)
-    const startOfMonthOffset = baseDate.getUTCDay() + 6 
-    const bump = baseDate.getUTCDay() === 0 ? 1: 0
-    console.log(`bump: ${bump}`)
-    const dayOfMonth = (7 * (row - bump)) + col - startOfMonthOffset + (7)
+    const baseDate = NewUTCDDate(year, month, 1);
+    const startOfMonthOffset = baseDate.getUTCDay() + 6;
+    const bump = baseDate.getUTCDay() === 0 ? 1 : 0;
+    console.log(`bump: ${bump}`);
+    const dayOfMonth = 7 * (row - bump) + col - startOfMonthOffset + 7;
 
     // weekday assumes that 0 = monday
     // so if we get a 0, we're checking MONDAY
     // const dayOffset = sundayOffset + weekday + (7 * weekno) + rowOffset - 7;
-    const dayOffset = dayOfMonth
+    const dayOffset = dayOfMonth;
 
     return NewUTCDDate(year, month, dayOffset + 1);
   }
 </script>
 
-<button onclick={prevMonth}>&lt;</button>
-<h1>{title}</h1>
-<button onclick={nextMonth}>&gt;</button>
+<div>
+  <div class="row">
+    <button class="btn-flat navbutton" onclick={prevMonth}>&lt;</button>
+    <h1 class="navcenter">{title}</h1>
+    <button class="btn-flat navbutton" onclick={nextMonth}>&gt;</button>
+  </div>
+  
+  <div class="row">
 
-<table>
-  <thead>
-    <tr>
-      <th>M</th>
-      <th>T</th>
-      <th>W</th>
-      <th>T</th>
-      <th>F</th>
-      <th>S</th>
-      <th>S</th>
-    </tr>
-  </thead>
-  <tbody>
-    {#each { length: 6 }, weekno}
+  <table>
+    <thead>
       <tr>
-        {#each { length: 7 }, weekday}
-          <!-- <td>{(weekday + (7 * (weekno)) + rowOffset) - 7}</td> -->
-          <td
-            class="cell {isThisMonthClass(
-              getCellDate(year, month, weekno, weekday),
-              viewDate
-            )}"
-          >
-            <CalendarCell cellData={cal[weekday][weekno]}></CalendarCell>
-          </td>
-          <!-- <td>{getDate(year, month, weekno, weekday)}</td> -->
-        {/each}
+        <th>M</th>
+        <th>T</th>
+        <th>W</th>
+        <th>T</th>
+        <th>F</th>
+        <th>S</th>
+        <th>S</th>
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each { length: 6 }, weekno}
+        <tr>
+          {#each { length: 7 }, weekday}
+            <!-- <td>{(weekday + (7 * (weekno)) + rowOffset) - 7}</td> -->
+            <td
+              class="cell {isThisMonthClass(
+                getCellDate(year, month, weekno, weekday),
+                viewDate
+              )}"
+            >
+              <CalendarCell cellData={cal[weekday][weekno]}></CalendarCell>
+            </td>
+            <!-- <td>{getDate(year, month, weekno, weekday)}</td> -->
+          {/each}
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+  </div>
+</div>
 
 <style>
-  td {
-    /* padding: 0.75em; */
+  .navcenter{
+    margin-left: 5vh;
+    margin-right: 5vh;
+    width: 120px;
+    justify-content: baseline;
+    padding-top: 10px;
+
+  }
+  .navbutton {
+    width: 8vh;
+    height: 8vh;
   }
   .otherMonth {
     opacity: 0.1;
   }
   .cell {
-    height: 2em;
-    width: 2em;
+    height: 2.4em;
+    width: 2.4em;
+  }
+  td {
+    border: 2px solid;
+    border-color: var(--calendar-lines);
+  }
+  table {
+    border-collapse: collapse;
   }
 </style>

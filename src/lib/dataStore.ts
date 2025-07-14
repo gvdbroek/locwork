@@ -5,12 +5,20 @@ import { invoke } from "@tauri-apps/api/core";
 
 
 export const records: Writable<DateLoc[]> = writable();
+export const locations: Writable<string[]> = writable();
 
 
 export const dataService ={
     loadInitialData: (recordData: DateLoc[]) => {
+        let locationSet: Set<string> = new Set();
+        
+        recordData.forEach((val, _, __) =>{locationSet.add(val.location)})
+        
+        locations.set([...locationSet]);
         records.set(recordData);
-    }
+    },
+
+
 }
 
 export const initializeDataService = async () =>{

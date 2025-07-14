@@ -1,25 +1,22 @@
 <script lang="ts">
   // import { invoke } from "@tauri-apps/api/core";
-    import type {PageProps} from "./$types";
+  import type { PageProps } from "./$types";
   let today = new Date().toISOString().split("T")[0];
-  let {data} : PageProps = $props();
-
+  let { data }: PageProps = $props();
 </script>
 
 <main class="container">
-  <a href="/day/{today}">Day</a>
-  <a href="/month/2024-01">Month</a>
+  <p>Loading...</p>
 </main>
 
 <style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-  }
 
-  .logo.svelte-kit:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
+  :global(.app) {
+    background-color: var(--background-color);
+    width: 400px;
+    height: 700px;
+    margin: 0;
   }
-
   :root {
     font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
     font-size: 16px;
@@ -27,106 +24,73 @@
     font-weight: 400;
 
     color: #0f0f0f;
-    background-color: #f6f6f6;
+    background-color: #232333;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+    --primary-color: #3498db;
+    --btn-highlight-color: #65b7ee;
+    --secondary-color: #141c28;
+    --background-color: #232333;
+    --text-color: #ddd;
+    --border-color: #ddd;
+    --button-padding: 10px 20px;
+    --border-radius: 10px;
+
+    --office-color: yellow;
+    --home-color: yellowgreen;
+    --nowork-color: rgb(56, 56, 56);
+    --unknown-color: darkgray;
+
+    --calendar-lines: rgb(56, 56, 56);
   }
 
-  .container {
+  :global(.container) {
     margin: 0;
-    padding-top: 10vh;
-    display: flex;
-    flex-direction: column;
+    padding-top: 5vh;
+    display: flexbox;
+    /* flex-direction: column; */
     justify-content: center;
     text-align: center;
+    /* border-radius: 100px; */
+    background-color: var(--background-color);
   }
 
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: 0.75s;
-  }
-
-  .logo.tauri:hover {
-    filter: drop-shadow(0 0 2em #24c8db);
-  }
-
-  .row {
-    display: flex;
-    justify-content: center;
-  }
-
-  a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-  }
-
-  a:hover {
-    color: #535bf2;
-  }
-
-  h1 {
-    text-align: center;
-  }
-
-  input,
-  button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    color: #0f0f0f;
-    background-color: #ffffff;
-    transition: border-color 0.25s;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  button {
-    cursor: pointer;
-  }
-
-  button:hover {
-    border-color: #396cd8;
-  }
-  button:active {
-    border-color: #396cd8;
-    background-color: #e8e8e8;
-  }
-
-  input,
-  button {
+  :global(.btn-flat) {
+    display: inline-block;
+    border: none;
+    box-shadow: none;
     outline: none;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+    padding: 1em;
   }
+  :global(.btn-flat:hover){
+background-color: var(--btn-highlight-color);
 
-  #greet-input {
-    margin-right: 5px;
+  }
+  :global(.row) {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 3vh;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
       color: #f6f6f6;
-      background-color: #2f2f2f;
+      background-color: var(--background-color);
     }
 
-    a:hover {
-      color: #24c8db;
-    }
 
-    input,
-    button {
-      color: #ffffff;
-      background-color: #0f0f0f98;
-    }
-    button:active {
-      background-color: #0f0f0f69;
-    }
   }
 </style>
