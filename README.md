@@ -18,3 +18,7 @@ After that, you should be able to run the command as such.
 python -m locwork
 ```
 
+or if you installed through pipx (only tested on linux)
+```shell
+locwork --help
+```
