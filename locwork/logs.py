@@ -52,7 +52,8 @@ def _get_records():
 
 
 
-@app.command()
+@app.command(help="Register a new record for a specified date (or today). Only one record is kept per day. Adding another record on an existing date overwrites it.",
+             short_help="Add/Update a record for a date. (must be paired with -t or -d)")
 def add(location:str,
     today: Annotated[bool, typer.Option("--today", "-t", help="Add a record for today", )] = False,
     day: Annotated[datetime, typer.Option("--date", "-d", help="Add a record with a specifc date", )] = None,
@@ -84,10 +85,14 @@ def add(location:str,
     _write_records(records)
     typer.echo(f"-- added record: {record.date} , {record.location} --")
 
-@app.command(name="list")
+@app.command(name="list",
+help="Lists all records (for now), will allow you to filter stored records.",
+short_help="Lists records based on filter.",
+hidden=True)
 def list_records():
     records = _get_records()
-    typer.echo(records)
+    # typer.echo(records)
+    typer.echo("-- Not implemented yet --")
 
 
 
