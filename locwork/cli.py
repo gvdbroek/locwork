@@ -6,7 +6,7 @@ app = typer.Typer(add_completion=False, invoke_without_command=True)
 app.add_typer(locwork.locations.app, name="location")
 app.add_typer(locwork.logs.app, name="log")
 
-@app.command(short_help="interactive mode")
+@app.command(short_help="interactive mode", hidden=True)
 def interactive():
     typer.echo("-- welcome.. but this is a todo --")
 
@@ -18,6 +18,8 @@ def main(ctx: typer.Context,
     and have to (for some reason) track these locations on a daily basis.
     See the help sections for more information. Use the CLI for automation through scripts or specific 
     commands, or the interactive mode for user convenience.
+
+    When going into interactive mode, it's important that you do not pass in any other commands, otherwise the -i flag is ignored.
     """
     if ctx.invoked_subcommand is None:
         if interactive_mode:
