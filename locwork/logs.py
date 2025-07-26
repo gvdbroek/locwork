@@ -40,6 +40,7 @@ def _get_records():
             fields = DateLocLog.keys()
 
             reader = csv.DictReader(f, fieldnames=fields)
+            next(reader) # skip headewrs
             for row in reader:
                 record = DateLocLog.from_dict(row)
                 records[record.date] = record
