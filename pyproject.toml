@@ -1,7 +1,7 @@
 [project]
 name = "locwork"
 version = "0.1.0"
-dependencies = ["rich", "typer"] 
+dependencies = ["rich", "typer","platformdirs"] 
 
 [project.scripts]
 locwork = "locwork.cli:main"
