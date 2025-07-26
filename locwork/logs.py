@@ -44,6 +44,7 @@ def _get_records():
             for row in reader:
                 record = DateLocLog.from_dict(row)
                 records[record.date] = record
+
     except Exception as e:
         print(e)
         return {}
@@ -59,12 +60,15 @@ def add(location:str,
     day: Annotated[datetime, typer.Option("--date", "-d", help="Add a record with a specifc date", )] = None,
     holiday: Annotated[bool, typer.Option('--holiday', help="Is this day a holiday?")] = False
     ):
+
     if not today and not day:
         typer.echo("-- either --today (-t) or --date (-d) are required --")
         return
     if today and day:
         typer.echo("-- today and date are mutually exclusive --")
         return
+    if day:
+        assert isinstance(day, datetime), f"expected datetime, got {type(day)}"
 
     day_type = DayType.WORK
     if holiday:
@@ -81,9 +85,16 @@ def add(location:str,
     
     record = DateLocLog(location, day, day_type)
     records = _get_records()
-    records[record.date] = record
+    updated = False
+
+    if record.date.isoformat() in records.keys():
+        updated = True
+    records[record.date.isoformat()] = record
     _write_records(records)
-    typer.echo(f"-- added record: {record.date} , {record.location} --")
+    if updated:
+        typer.echo(f"-- updated record: {record.date} , {record.location} --")
+    else:
+        typer.echo(f"-- added record: {record.date} , {record.location} --")
 
 @app.command(name="list",
 help="Lists all records (for now), will allow you to filter stored records.",

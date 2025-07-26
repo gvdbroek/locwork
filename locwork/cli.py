@@ -1,14 +1,39 @@
 import typer
+from datetime import datetime
 import locwork.locations
 import locwork.logs
+import locwork.interactive
 app = typer.Typer(add_completion=False, invoke_without_command=True)
 
 app.add_typer(locwork.locations.app, name="location")
 app.add_typer(locwork.logs.app, name="log")
 
+def interactive_log_date(day):
+    from locwork.locations import _get_locations
+    from locwork.logs import add as add_log
+    locations = _get_locations()
+    # locations.insert(0, "home")
+    res = locwork.interactive.prompt_index("Select your work location", locations)
+    if res is not None:
+        add_log(res, day=day)
+
+def interactive_log_today():
+    interactive_log_date(datetime.today())
+    
+
+
 @app.command(short_help="interactive mode", hidden=True)
 def interactive():
-    typer.echo("-- welcome.. but this is a todo --")
+    # typer.echo("-- welcome.. but this is a todo --")
+    from locwork.interactive import Action
+    actions = [
+        Action(interactive_log_today, "> log today", 't'),
+        Action(lambda: print("calendar view"), "> calendar", 'c')
+    ]
+    res = locwork.interactive.prompt_action("Choose an action", actions)
+    if res:
+        res.action()
+
 
 @app.callback()
 def main(ctx: typer.Context,

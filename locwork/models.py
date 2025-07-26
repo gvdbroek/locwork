@@ -10,7 +10,7 @@ class DayType(Enum):
 @dataclass
 class DateLocLog:
     location: str
-    date: date
+    date: str
     day_type: DayType
 
     def as_dict(self):
