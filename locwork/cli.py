@@ -3,6 +3,7 @@ from datetime import datetime
 import locwork.locations
 import locwork.logs
 import locwork.interactive
+
 app = typer.Typer(add_completion=False, invoke_without_command=True)
 
 app.add_typer(locwork.locations.app, name="location")
@@ -24,7 +25,13 @@ def interactive_log_today():
 
 @app.command(short_help="interactive mode", hidden=True)
 def interactive():
-    # typer.echo("-- welcome.. but this is a todo --")
+    
+    from locwork.statpage import render_statpage    
+    
+    render_statpage()
+    return
+
+
     from locwork.interactive import Action
     actions = [
         Action(interactive_log_today, "> log today", 't'),

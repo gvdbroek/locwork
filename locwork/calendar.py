@@ -1,4 +1,4 @@
-from models import DateLocLog,DayType
+from locwork.models import DateLocLog,DayType
 from datetime import date, timedelta
 from rich.panel import Panel
 from rich.align import Align
@@ -31,12 +31,9 @@ def render_weekday(month, date:date, log:DateLocLog|None):
     col = STYLES[None]
 
     if log:
-        col = STYLES[log.day_type]
-        if log.location in OFFICE_LOCATIONS:
-            col = STYLES["OFFICE"]
-        
+        col = STYLES.get(log.day_type, "yellow underline")
         if log.location in HOME_LOCATIONS:
-            col = STYLES["HOME"]
+            col = STYLES.get("HOME", "green underline")
     
     if month != date.month:
         col = col + " italic"
@@ -46,7 +43,7 @@ def render_weekday(month, date:date, log:DateLocLog|None):
     return _style(f'{date.day:02}', col)
 
 
-def render_calendar(year:int, month:int, logs:[DateLocLog])->list[str]:
+def render_calendar(year:int, month:int, logs:[DateLocLog])->list[str]: 
     data = []
     headers = [" m", " t" , " w" , " t", " f", " s", " s"]
     # headers = [_style(h, COLORS['HEADER']) for h in headers]

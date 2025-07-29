@@ -5,7 +5,7 @@ import csv
 from datetime import date, datetime
 from platformdirs import user_data_dir
 from pathlib import Path
-from locwork.models import DateLocLog, DayType
+from locwork.models import DateLocLog, DayType, DateLocMap
 from locwork.locations import _get_locations
 app = typer.Typer(invoke_without_command=True)
 
@@ -29,7 +29,7 @@ def _write_records(records:dict[str, DateLocLog]):
         for day, record in records.items():
             writer.writerow(record.as_dict())
             
-def _get_records():
+def _get_records()->dict[str,DateLocLog]:
 
     if not os.path.exists(_log_store):
         return {}
@@ -43,7 +43,7 @@ def _get_records():
             next(reader) # skip headewrs
             for row in reader:
                 record = DateLocLog.from_dict(row)
-                records[record.date] = record
+                records[record.date.isoformat()] = record
 
     except Exception as e:
         print(e)
@@ -51,6 +51,13 @@ def _get_records():
 
     return records
 
+def get_records()->DateLocMap:
+    records = _get_records()
+    m = DateLocMap()
+    for k,v in records.items():
+        assert isinstance(v.date, date)
+        m[k] = v
+    return m
 
 
 @app.command(help="Register a new record for a specified date (or today). Only one record is kept per day. Adding another record on an existing date overwrites it.",

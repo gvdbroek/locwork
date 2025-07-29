@@ -21,7 +21,7 @@ dates = [
 cal = render_calendar(2025, 7, dates)
 cal_text = '\n'.join(cal)
 
-renderable = Align(Panel(cal_text), align="center")
+renderable = align(panel(cal_text), align="center")
 
 def main():
 
