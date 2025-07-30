@@ -21,21 +21,25 @@ def interactive_log_date(day):
 def interactive_log_today():
     interactive_log_date(datetime.today())
     
+def interactive_quit():
+    import sys
+    sys.exit()
 
 
 @app.command(short_help="interactive mode", hidden=True)
 def interactive():
     
-    from locwork.statpage import render_statpage    
-    
-    render_statpage()
-    return
-
+    from locwork.statpage import render_statpage_today   
+    from locwork.statpage import PagedStatsViewer
+    from locwork.logs import get_records
+    records = get_records()
+    viewer = PagedStatsViewer(records)
 
     from locwork.interactive import Action
     actions = [
-        Action(interactive_log_today, "> log today", 't'),
-        Action(lambda: print("calendar view"), "> calendar", 'c')
+        Action(interactive_log_today, " > log today", 'l'),
+        Action(viewer.show, " > stats", 's'),
+        Action(interactive_quit, " > quit" , 'q')
     ]
     res = locwork.interactive.prompt_action("Choose an action", actions)
     if res:

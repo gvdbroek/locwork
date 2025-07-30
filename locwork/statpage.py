@@ -1,3 +1,4 @@
+import sys
 from datetime import date, timedelta
 from locwork.logs import get_records
 from locwork.models import DateLocLog, DateLocMap
@@ -13,7 +14,7 @@ from rich.align import Align
 from collections import defaultdict
 from rich.markdown import Markdown
 from rich.console import Console
-
+from locwork.interactive import _Getch
 console = Console()
 
 
@@ -104,18 +105,25 @@ def _render_calendar_block(records, date_start:date, date_end:date):
         align="center")
     return renderable
 
-def render_statpage():
+def render_statpage_today():
+
     
     records = get_records()
     today = date.today()
     month_start, month_end = get_month_range_for_date(today)
+    render_statpage(month_start, month_end, records)
+
+def render_statpage(date_start, date_end, records):
+    
+    month_start = date_start
+    month_end = date_end
 
     
     filtereded_records = filter_records_between_dates(records,month_start, month_end)
     
     title = Markdown("## Days worked at")
     
-    calendar_pane = rich.panel.Panel(_render_calendar_block(filtereded_records, month_start, month_end))
+    calendar_pane = rich.panel.Panel(_render_calendar_block(filtereded_records, month_start, month_end), title=month_start.isoformat())
     stat_block = rich.panel.Panel(_render_locations_block(filtereded_records, month_start, month_end))
     ui = rich.console.Group(
 
@@ -123,12 +131,48 @@ def render_statpage():
         stat_block
     )
     console.print(ui)
-    #rich.print(ui)
 
 
+def interactive_statpage():
+    records = get_records()
+    viewer = PagedStatsViewer(records)
+    pass
+
+class PagedStatsViewer:
+    def __init__(self, locmap:DateLocMap):
+        self._data = locmap
+
+        self._start_date, self._end_date = get_month_range_for_date(date.today())
+
+        self._actions = {
+            'l': self._next_range,
+            'h': self._previous_range,
+            'q': lambda: sys.exit()
+        }
+
+    
+    def show(self):
+        with console.screen():
+            self._wait_for_input()
+
+    def _render_page(self):
+        render_statpage(self._start_date, self._end_date, self._data)
+        
+    def _previous_range(self):
+        prev_month = self._start_date - timedelta(days=1)
+        self._start_date, self._end_date = get_month_range_for_date(prev_month)
+
+    def _next_range(self):
+        self._start_date, self._end_date = get_month_range_for_date(self._end_date)
+
+    def _wait_for_input(self):
+        while True:
+            console.clear()
+            self._render_page()
+            c = _Getch()()
+            action = self._actions.get(c, None)
+            if action:
+                action()
+            
 
 
-if __name__ == "__main__":
-    render_statpage(
-        date(2025,7,1), date(2025,8,1)
-    )
