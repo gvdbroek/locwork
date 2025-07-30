@@ -26,10 +26,14 @@ class DateLocLog:
     def from_dict(cls, data:dict):
         data_copy = data.copy()
         data["date"] = date.fromisoformat(data["date"])
-
         
-        if 'day_type' in data_copy and not isinstance(data_copy['day_type'], DayType):
-            data_copy['day_type'] = DayType(int(data_copy['day_type']))
+        day_type = data_copy.get('day_type')
+        if not isinstance(day_type, DayType):
+            day_type = DayType(int(day_type))
+        data['day_type'] = day_type
+        
+        # if 'day_type' in data_copy and not isinstance(data_copy['day_type'], DayType):
+        #     data_copy['day_type'] = DayType(int(data_copy['day_type']))
 
         return DateLocLog(**data)
     

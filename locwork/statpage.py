@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from locwork.logs import get_records
 from locwork.models import DateLocLog, DateLocMap
 import locwork.calendar
+from locwork.models import DayType
 from enum import Enum
 import rich
 from rich.panel import Padding, Panel
@@ -48,7 +49,10 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
     location_counts = defaultdict(int)
 
     for k,v in records.items():
-        location_counts[v.location] += 1
+        if v.day_type == DayType.WORK:
+            location_counts[v.location] += 1
+        else:
+            location_counts["holiday"] += 1
         
     days_recorded = sum(location_counts.values())
     
@@ -77,15 +81,17 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
             range_weekdays += 1
         range_days += 1
         
+    num_holidays = location_counts["holiday"]
     
     texts = [
         Markdown("## Distribution", justify="left"),
         
         table,
         Markdown("## Workdays", justify="left"),
-        Text("This month %s" % range_weekdays),
+        Text("This month %s" % (range_weekdays - num_holidays)),
         Text("Logged  %s" % days_recorded),
-        Text("Unlogged  %s" % (range_weekdays - days_recorded))
+        Text("Unlogged  %s" % (range_weekdays - days_recorded - num_holidays)),
+        Text("Holiday  %s" % ( num_holidays))
     ]
 
     
@@ -147,6 +153,7 @@ class PagedStatsViewer:
         self._actions = {
             'l': self._next_range,
             'h': self._previous_range,
+            't': self._set_range_this_month,
             'q': lambda: sys.exit()
         }
 
@@ -154,10 +161,14 @@ class PagedStatsViewer:
     def show(self):
         with console.screen():
             self._wait_for_input()
-
+    
     def _render_page(self):
         render_statpage(self._start_date, self._end_date, self._data)
-        
+        console.print("Use h/l to navigate months, q to quit")
+
+    def _set_range_this_month(self):
+        self._start_date, self._end_date = get_month_range_for_date(date.today())
+
     def _previous_range(self):
         prev_month = self._start_date - timedelta(days=1)
         self._start_date, self._end_date = get_month_range_for_date(prev_month)

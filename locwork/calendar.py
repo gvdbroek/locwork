@@ -14,7 +14,7 @@ HOME_LOCATIONS = [
 
 STYLES = {
     None: "grey42",
-    DayType.FREE: "",
+    DayType.FREE: "purple",
     DayType.WORK: "underline",
     "HOME": "green underline",
     "OFFICE": "yellow underline",
@@ -31,14 +31,17 @@ def render_weekday(month, date:date, log:DateLocLog|None):
     col = STYLES[None]
 
     if log:
-        col = STYLES.get(log.day_type, "yellow underline")
+        col = STYLES.get("OFFICE", "yellow underline")
+
+        if log.day_type == DayType.FREE:
+            col = STYLES.get(DayType.FREE)
+            return _style(f'{date.day:02}', col)
+
         if log.location in HOME_LOCATIONS:
             col = STYLES.get("HOME", "green underline")
     
     if month != date.month:
         col = col + " italic"
-
-    
 
     return _style(f'{date.day:02}', col)
 
