@@ -59,6 +59,7 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
     places = [Text(key) for key in location_counts.keys()]
     places = list(location_counts.keys())
     places_counts = location_counts.values()
+    num_holidays = location_counts["holiday"]
     
     sorted_places = sorted(places, key=lambda x: location_counts[x], reverse=True)
     
@@ -73,7 +74,8 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
         if loc == "holiday":
             continue
         count = location_counts[loc]
-        table.add_row(loc, str(count) , f"{count/days_recorded * 100:0.1f}%")
+        # todo: days_recorded should already have num_holidays subtracted at creation, not here, and not below in the texts
+        table.add_row(loc, str(count) , f"{count/(days_recorded - num_holidays) * 100:0.1f}%")
 
     range_weekdays = 0
     range_days = 0
@@ -83,7 +85,6 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
             range_weekdays += 1
         range_days += 1
         
-    num_holidays = location_counts["holiday"]
     
     texts = [
         Markdown("## Distribution", justify="left"),
