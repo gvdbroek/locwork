@@ -70,6 +70,8 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
     table.add_column("Logged")
     table.add_column("percentage")
     for loc in sorted_places:
+        if loc == "holiday":
+            continue
         count = location_counts[loc]
         table.add_row(loc, str(count) , f"{count/days_recorded * 100:0.1f}%")
 
@@ -89,8 +91,8 @@ def _render_locations_block(records: DateLocMap, date_start:date, date_end:date)
         table,
         Markdown("## Workdays", justify="left"),
         Text("This month %s" % (range_weekdays - num_holidays)),
-        Text("Logged  %s" % days_recorded),
-        Text("Unlogged  %s" % (range_weekdays - days_recorded - num_holidays)),
+        Text("Logged  %s" % (days_recorded - num_holidays)),
+        Text("Unlogged  %s" % (range_weekdays - days_recorded)),
         Text("Holiday  %s" % ( num_holidays))
     ]
 
