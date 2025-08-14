@@ -36,14 +36,16 @@ def interactive():
     viewer = PagedStatsViewer(records)
 
     from locwork.interactive import Action
+    
     actions = [
         Action(interactive_log_today, " > log today", 'l'),
         Action(viewer.show, " > stats", 's'),
         Action(interactive_quit, " > quit" , 'q')
     ]
-    res = locwork.interactive.prompt_action("Choose an action", actions)
-    if res:
-        res.action()
+    while(True):
+        res = locwork.interactive.prompt_action("Choose an action", actions)
+        if res:
+            res.action()
 
 
 @app.callback()
