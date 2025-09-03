@@ -28,18 +28,18 @@ def interactive_quit():
 
 @app.command(short_help="interactive mode", hidden=True)
 def interactive():
-    
     from locwork.statpage import render_statpage_today   
     from locwork.statpage import PagedStatsViewer
     from locwork.logs import get_records
     records = get_records()
-    viewer = PagedStatsViewer(records)
+    # viewer = PagedStatsViewer(records)
+    show_viewer = lambda x : PagedStatsViewer(records).show
 
     from locwork.interactive import Action
     
     actions = [
         Action(interactive_log_today, " > log today", 'l'),
-        Action(viewer.show, " > stats", 's'),
+        Action(show_viewer, " > stats", 's'),
         Action(interactive_quit, " > quit" , 'q')
     ]
     while(True):
