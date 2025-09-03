@@ -31,9 +31,7 @@ def interactive():
     from locwork.statpage import render_statpage_today   
     from locwork.statpage import PagedStatsViewer
     from locwork.logs import get_records
-    records = get_records()
-    # viewer = PagedStatsViewer(records)
-    show_viewer = lambda x : PagedStatsViewer(records).show
+    show_viewer = lambda : PagedStatsViewer(get_records()).show()
 
     from locwork.interactive import Action
     
