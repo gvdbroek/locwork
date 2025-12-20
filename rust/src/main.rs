@@ -1,30 +1,24 @@
 mod panels;
 mod store;
 
-use std::collections::HashMap;
-
 use color_eyre::Result;
 use crossterm::event::{self, Event};
 use ratatui::{
     DefaultTerminal, Frame,
     layout::{Constraint, Layout, Rect},
-    style::Style,
-    text::Span,
-    widgets::{Block, Widget},
 };
+use std::collections::HashMap;
 
-use crate::{
-    panels::{
-        debugpanel::DebugPanel,
-        locationpanel::{LocationsPanel, PanelType},
-        panel::Panel,
-    },
-    store::Location,
+use crate::panels::{
+    debugpanel::DebugPanel,
+    locationpanel::{LocationsPanel, PanelType},
+    panel::Panel,
 };
 
 /// Context of app
 pub struct Context {
     pub panels: HashMap<PanelType, Box<dyn Panel>>,
+    pub rects: HashMap<PanelType, Rect>,
     pub focussed: PanelType,
 }
 
@@ -44,18 +38,14 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
     // init context and panels
     let mut context = Context {
         panels: HashMap::new(),
-        focussed: PanelType::Calendar,
+        rects: HashMap::new(),
+        focussed: PanelType::Locations,
     };
 
     let debug_panel = DebugPanel {
         title: "calendar".to_string(),
     };
-    let mut location_panel = LocationsPanel::new();
-    // let mut location_panel = LocationsPanel {
-    //     title: "location".to_string(),
-    //     locations: Vec::new(),
-    // };
-    // location_panel.reload();
+    let location_panel = LocationsPanel::new();
 
     context
         .panels
@@ -70,21 +60,25 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
             let row_constraint = (0..2).map(|_| Constraint::Fill(1));
             let horizontal = Layout::vertical(row_constraint).spacing(1);
             let rects = horizontal.split(frame.area());
-            let rect = rects.first().unwrap().to_owned();
-            let last = rects.last().unwrap().to_owned();
+            let first_rect = rects.first().unwrap().to_owned();
+            let last_rect = rects.last().unwrap().to_owned();
+
+            // let mut pane_rects: HashMap<PanelType, Rect> = HashMap::new();
+            context.rects.insert(PanelType::Locations, first_rect);
+            context.rects.insert(PanelType::Calendar, last_rect);
 
             // draw
-            let locations_pane = context.panels.get(&PanelType::Locations);
-            match locations_pane {
-                Some(panel) => panel.render(frame, rect, context.focussed == PanelType::Locations),
-                None => (),
-            }
-
-            let calendar_pane = context.panels.get(&PanelType::Calendar);
-            match calendar_pane {
-                Some(panel) => panel.render(frame, last, context.focussed == PanelType::Calendar),
-                None => (),
-            }
+            let visible_panes = vec![PanelType::Locations, PanelType::Calendar];
+            visible_panes.iter().for_each(|pane_type| {
+                let pane = context.panels.get(pane_type);
+                let rect = context.rects.get(pane_type).unwrap();
+                match pane {
+                    Some(panel) => {
+                        panel.render(frame, rect.clone(), &context.focussed == pane_type);
+                    }
+                    None => (),
+                }
+            });
         })?;
 
         // logic
