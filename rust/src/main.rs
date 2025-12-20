@@ -12,6 +12,8 @@ use ratatui::{
     widgets::{Block, Widget},
 };
 
+use crate::store::Location;
+
 #[derive(PartialEq, Eq, Hash)]
 pub enum Panels {
     Calendar,
@@ -36,6 +38,24 @@ pub enum Pane {
 
 pub struct DebugPanel {
     pub title: String,
+}
+pub struct LocationsPanel {
+    pub title: String,
+    pub locations: Vec<Location>,
+}
+impl LocationsPanel {
+    pub fn new() -> Self {
+        let locations = store::get_locations().unwrap();
+        LocationsPanel {
+            title: "Locations".to_string(),
+            locations: locations,
+        }
+    }
+
+    pub fn reload(&mut self) -> Result<(), ()> {
+        self.locations = store::get_locations().unwrap();
+        Ok(())
+    }
 }
 impl Panel for DebugPanel {
     fn render(&self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
@@ -89,7 +109,7 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
             let horizontal = Layout::vertical(row_constraint).spacing(1);
             let rects = horizontal.split(frame.area());
             let rect = rects.first().unwrap().to_owned();
-            let lest = rects.last().unwrap().to_owned();
+            let last = rects.last().unwrap().to_owned();
 
             // Paragraph::new("Hi?").block(Block::bordered()).render(rect);
 
@@ -101,24 +121,19 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
 
             let calendar_pane = context.panels.get(&Panels::Calendar);
             match calendar_pane {
-                Some(panel) => panel.render(frame, lest, context.focussed == Panels::Calendar),
+                Some(panel) => panel.render(frame, last, context.focussed == Panels::Calendar),
                 None => (),
             }
         })?;
 
         if let Event::Key(key) = event::read()? {
             match key.code {
-                event::KeyCode::Char(c) => {
-                    match c {
-                        'q' => break Ok(()),
-                        '2' => context.focussed = Panels::Locations,
-                        '1' => context.focussed = Panels::Calendar,
-                        _ => {}
-                    }
-                    // if c == 'q' {
-                    //     break Ok(());
-                    // }
-                }
+                event::KeyCode::Char(c) => match c {
+                    'q' => break Ok(()),
+                    '2' => context.focussed = Panels::Calendar,
+                    '1' => context.focussed = Panels::Locations,
+                    _ => {}
+                },
                 _ => {}
             }
         }
