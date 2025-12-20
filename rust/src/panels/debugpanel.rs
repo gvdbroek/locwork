@@ -8,7 +8,7 @@ pub struct DebugPanel {
 }
 
 impl Panel for DebugPanel {
-    fn render(&self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
+    fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
         let mut block = Block::bordered().title(self.title.as_str());
         let inner = block.inner(area);
         let span = Span::raw("this is a span");

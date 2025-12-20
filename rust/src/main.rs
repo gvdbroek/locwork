@@ -70,7 +70,7 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
             // draw
             let visible_panes = vec![PanelType::Locations, PanelType::Calendar];
             visible_panes.iter().for_each(|pane_type| {
-                let pane = context.panels.get(pane_type);
+                let pane = context.panels.get_mut(pane_type);
                 let rect = context.rects.get(pane_type).unwrap();
                 match pane {
                     Some(panel) => {
