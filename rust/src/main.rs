@@ -1,28 +1,37 @@
+mod store;
+
 use std::collections::HashMap;
 
-use color_eyre::{Result, owo_colors::OwoColorize};
-use crossterm::{
-    event::{self, Event},
-    style::{self, Color},
-};
+use color_eyre::Result;
+use crossterm::event::{self, Event};
 use ratatui::{
     DefaultTerminal, Frame,
     layout::{Constraint, Layout},
     style::Style,
     text::Span,
-    widgets::{Block, Paragraph, Widget},
+    widgets::{Block, Widget},
 };
+
+#[derive(PartialEq, Eq, Hash)]
+pub enum Panels {
+    Calendar,
+    Status,
+    Locations,
+}
 
 /// Context of app
 pub struct Context {
-    pub panels: HashMap<String, Box<dyn Panel>>,
-    pub focussed: String,
+    pub panels: HashMap<Panels, Box<dyn Panel>>,
+    pub focussed: Panels,
 }
 
 pub trait Panel {
     fn render(&self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool);
     fn handle_input(&mut self, event: Event);
     fn is_focussed(&self, event: Event) -> bool;
+}
+pub enum Pane {
+    Status,
 }
 
 pub struct DebugPanel {
@@ -57,18 +66,23 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
     // init context and panels
     let mut context = Context {
         panels: HashMap::new(),
-        focussed: "main".into(),
+        focussed: Panels::Calendar,
     };
 
     let debug_panel = DebugPanel {
-        title: "Panel1".to_string(),
+        title: "calendar".to_string(),
     };
     let debug_panel2 = DebugPanel {
-        title: "Panel2".to_string(),
+        title: "location".to_string(),
     };
 
-    context.panels.insert("main".into(), Box::new(debug_panel));
-    context.panels.insert("alt".into(), Box::new(debug_panel2));
+    context
+        .panels
+        .insert(Panels::Calendar, Box::new(debug_panel));
+    context
+        .panels
+        .insert(Panels::Locations, Box::new(debug_panel2));
+
     loop {
         terminal.draw(|frame| {
             let row_constraint = (0..2).map(|_| Constraint::Fill(1));
@@ -79,15 +93,15 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
 
             // Paragraph::new("Hi?").block(Block::bordered()).render(rect);
 
-            let pan = context.panels.get("main".into());
-            match pan {
-                Some(panel) => panel.render(frame, rect, context.focussed == "main".to_string()),
+            let locations_pane = context.panels.get(&Panels::Locations);
+            match locations_pane {
+                Some(panel) => panel.render(frame, rect, context.focussed == Panels::Locations),
                 None => (),
             }
 
-            let pan2 = context.panels.get("alt".into());
-            match pan2 {
-                Some(panel) => panel.render(frame, lest, context.focussed == "alt".to_string()),
+            let calendar_pane = context.panels.get(&Panels::Calendar);
+            match calendar_pane {
+                Some(panel) => panel.render(frame, lest, context.focussed == Panels::Calendar),
                 None => (),
             }
         })?;
@@ -97,8 +111,8 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
                 event::KeyCode::Char(c) => {
                     match c {
                         'q' => break Ok(()),
-                        '2' => context.focussed = "alt".to_string(),
-                        '1' => context.focussed = "main".to_string(),
+                        '2' => context.focussed = Panels::Locations,
+                        '1' => context.focussed = Panels::Calendar,
                         _ => {}
                     }
                     // if c == 'q' {
