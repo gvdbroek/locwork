@@ -3,7 +3,7 @@ use ratatui::{
     Frame,
     style::{Style, Stylize},
     text::{Line, Span},
-    widgets::Block,
+    widgets::{Block, List},
 };
 
 use crate::{
@@ -57,7 +57,10 @@ impl Panel for LocationsPanel {
         if focussed {
             block = block.border_style(Style::default().fg(ratatui::style::Color::LightRed));
         }
+        // let ls = List::new(self.locations.iter().map(|l| l.name.to_string()).collect());
+        let ls = List::new(["hi", "i'm", "a", "test"]);
+
         frame.render_widget(block, area);
-        frame.render_widget(span, inner);
+        frame.render_widget(ls, inner);
     }
 }
