@@ -2,7 +2,7 @@ use crossterm::event::Event;
 use ratatui::{Frame, style::Style, text::Span, widgets::Block};
 
 pub trait Panel {
-    fn render(&self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
+    fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
         let mut block = Block::bordered();
         let inner = block.inner(area);
         let span = Span::raw("this is a default span");
