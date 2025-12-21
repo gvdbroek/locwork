@@ -1,13 +1,17 @@
-use crossterm::event::Event;
+use color_eyre::eyre::{Error, Result};
+use crossterm::event::{self, Event, KeyEvent};
 use ratatui::{
     Frame,
-    style::{Style, Stylize},
+    style::{Modifier, Style, Stylize},
     text::{Line, Span},
     widgets::{Block, List, ListState},
 };
 
 use crate::{
-    panels::{HandleEventResult, panel::Panel},
+    panels::{
+        HandleEventResult,
+        panel::{InputModal, InputMode, InputModelInputResult, Panel},
+    },
     store::{self, Location},
 };
 
@@ -19,23 +23,26 @@ pub enum PanelType {
 }
 
 pub struct LocationsPanel {
-    pub title: String,
+    pub label: String,
     pub locations: Vec<Location>,
     pub tag: String,
     state: ListState,
+    input_mode: InputMode,
+    input_modal: InputModal,
 }
 
 impl LocationsPanel {
     pub fn new() -> Self {
         let locations = store::get_locations().unwrap();
         let mut base = LocationsPanel {
-            title: "Locations".to_string(),
+            label: "Locations".to_string(),
             locations: locations,
             tag: " ¹".to_string(),
             state: ListState::default(),
+            input_mode: InputMode::Normal,
+            input_modal: InputModal::new(),
         };
         base.state.select_first();
-
         base
     }
 
@@ -46,41 +53,70 @@ impl LocationsPanel {
 }
 
 impl Panel for LocationsPanel {
-    fn handle_input(&mut self, event: Event) -> HandleEventResult {
-        HandleEventResult::Skipped
+    fn handle_input(&mut self, key_event: KeyEvent) -> Result<HandleEventResult> {
+        if self.input_mode == InputMode::Editing {
+            match self.input_modal.handle_input(key_event) {
+                Ok(k) => match k {
+                    InputModelInputResult::Editting => {}
+                    InputModelInputResult::Cancelled => {
+                        self.input_mode = InputMode::Normal;
+                    }
+                    InputModelInputResult::Confirmed => {
+                        self.input_mode = InputMode::Normal;
+                        return Ok(HandleEventResult::Skipped);
+                    }
+                },
+                Err(_) => panic!("Input Modal failed during input"),
+            }
+        } else {
+            match key_event.code {
+                event::KeyCode::Char(c) => match c {
+                    'j' => self.state.select_next(),
+                    'k' => self.state.select_previous(),
+                    'a' => {
+                        self.input_modal.clear();
+                        self.input_mode = InputMode::Editing;
+                    }
+                    _ => return Ok(HandleEventResult::Skipped),
+                },
+                _ => {}
+            }
+        }
+
+        Ok(HandleEventResult::Processing)
     }
     fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
-        let label = Span::raw("Location");
-        let mut tag_style = Style::default().fg(ratatui::style::Color::LightRed);
+        let label = Span::raw(self.label.clone());
+        let tag_style = Style::default().fg(ratatui::style::Color::LightRed);
         let tagspan = Span::raw(&self.tag).style(tag_style.bold());
 
         let title = Line::raw("").spans([tagspan, label]);
-        // let title = Line::raw("Location".to_string());
         let mut block = Block::bordered().title(title);
-        let inner = block.inner(area);
-        let span = Span::raw("this is a location span");
+        let block_inner = block.inner(area);
 
         let items: Vec<String> = self.locations.iter().map(|l| l.name.clone()).collect();
-        let list = List::new(items)
-            .block(Block::bordered().title("List"))
+        let mut list = List::new(items)
             .highlight_style(Style::new().reversed())
-            // .highlight_symbol(">>")
             .repeat_highlight_symbol(true);
 
         if focussed {
             block = block.border_style(Style::default().fg(ratatui::style::Color::LightRed));
-            frame.render_stateful_widget(list, area, &mut self.state);
-        } else {
-            frame.render_widget(list, area);
-        }
-        // let ls = List::new(self.locations.iter().map(|l| l.name.to_string()).collect());
-        // let ls =
-        //     List::new(options).highlight_style(Style::default().fg(ratatui::style::Color::Yellow));
+            list = list.highlight_style(
+                Style::new()
+                    .fg(ratatui::style::Color::LightRed)
+                    .add_modifier(Modifier::BOLD),
+            );
 
-        // let mut state = ListState::default();
-        // let items = ["Item 1", "Item 2", "Item 3"];
+            frame.render_stateful_widget(list, block_inner, &mut self.state);
+        } else {
+            list = list.highlight_style(Style::new().add_modifier(Modifier::BOLD));
+            frame.render_stateful_widget(list, block_inner, &mut self.state);
+        }
 
         frame.render_widget(block, area);
-        // frame.render_widget(ls, inner);
+        // draw on top
+        if self.input_mode == InputMode::Editing {
+            self.input_modal.render(frame);
+        }
     }
 }

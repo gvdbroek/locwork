@@ -1,4 +1,5 @@
-use crossterm::event::Event;
+use color_eyre::eyre::Result;
+use crossterm::event::{Event, KeyEvent};
 use ratatui::{Frame, style::Style, text::Span, widgets::Block};
 
 use crate::panels::{HandleEventResult, Panel};
@@ -18,7 +19,7 @@ impl Panel for DebugPanel {
         frame.render_widget(block, area);
         frame.render_widget(span, inner);
     }
-    fn handle_input(&mut self, event: Event) -> HandleEventResult {
-        HandleEventResult::Skipped
+    fn handle_input(&mut self, key: KeyEvent) -> Result<HandleEventResult> {
+        Ok(HandleEventResult::Skipped)
     }
 }

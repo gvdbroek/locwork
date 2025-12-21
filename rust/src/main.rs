@@ -10,6 +10,7 @@ use ratatui::{
 use std::collections::HashMap;
 
 use crate::panels::{
+    HandleEventResult,
     debugpanel::DebugPanel,
     locationpanel::{LocationsPanel, PanelType},
     panel::Panel,
@@ -83,15 +84,23 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
 
         // logic
 
-        if let Event::Key(key) = event::read()? {
-            match key.code {
-                event::KeyCode::Char(c) => match c {
-                    'q' => break Ok(()),
-                    '2' => context.focussed = PanelType::Calendar,
-                    '1' => context.focussed = PanelType::Locations,
-                    _ => {}
-                },
-                _ => {}
+        let active_panel = context.panels.get_mut(&context.focussed).unwrap();
+        let mut active_panel_result: HandleEventResult = HandleEventResult::Skipped;
+        if active_panel_result == HandleEventResult::Skipped {
+            if let Event::Key(key) = event::read()? {
+                active_panel_result = active_panel.handle_input(key).unwrap();
+                match active_panel_result {
+                    HandleEventResult::Processing => {}
+                    HandleEventResult::Skipped => match key.code {
+                        event::KeyCode::Char(c) => match c {
+                            'q' => break Ok(()),
+                            '2' => context.focussed = PanelType::Calendar,
+                            '1' => context.focussed = PanelType::Locations,
+                            _ => {}
+                        },
+                        _ => {}
+                    },
+                }
             }
         }
     }
