@@ -1,3 +1,4 @@
+use color_eyre::Result;
 #[derive(Clone, PartialEq, Eq, Debug)]
 
 pub struct Location {
@@ -6,7 +7,7 @@ pub struct Location {
     pub tag: String,
 }
 
-pub fn get_locations() -> Result<Vec<Location>, ()> {
+pub fn get_locations() -> Result<Vec<Location>> {
     let locations: Vec<Location> = vec![
         Location {
             id: 1,
@@ -27,6 +28,6 @@ pub fn get_locations() -> Result<Vec<Location>, ()> {
     Ok(locations)
 }
 
-pub fn add_location(name: String, tag: Option<String>) -> Result<(), ()> {
+pub fn add_location(name: String, tag: Option<String>) -> Result<()> {
     todo!();
 }

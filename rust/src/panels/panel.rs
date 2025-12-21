@@ -37,7 +37,7 @@ pub enum InputModelInputResult {
 
 #[derive(Eq, PartialEq)]
 pub struct InputModal {
-    input: String,
+    pub input: String,
     character_index: usize,
     input_mode: InputMode,
 }

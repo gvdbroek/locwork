@@ -54,37 +54,37 @@ impl LocationsPanel {
 
 impl Panel for LocationsPanel {
     fn handle_input(&mut self, key_event: KeyEvent) -> Result<HandleEventResult> {
-        if self.input_mode == InputMode::Editing {
-            match self.input_modal.handle_input(key_event) {
+        match self.input_mode {
+            InputMode::Editing => match self.input_modal.handle_input(key_event) {
                 Ok(k) => match k {
                     InputModelInputResult::Editting => {}
                     InputModelInputResult::Cancelled => {
                         self.input_mode = InputMode::Normal;
+                        self.input_modal.clear();
                     }
                     InputModelInputResult::Confirmed => {
                         self.input_mode = InputMode::Normal;
+                        self.input_modal.clear();
+                        store::add_location(self.input_modal.input.clone(), None)?;
                         return Ok(HandleEventResult::Skipped);
                     }
                 },
                 Err(_) => panic!("Input Modal failed during input"),
-            }
-        } else {
-            match key_event.code {
-                event::KeyCode::Char(c) => match c {
-                    'j' => self.state.select_next(),
-                    'k' => self.state.select_previous(),
-                    'a' => {
-                        self.input_modal.clear();
-                        self.input_mode = InputMode::Editing;
-                    }
-                    _ => return Ok(HandleEventResult::Skipped),
-                },
-                _ => {}
-            }
+            },
+            InputMode::Normal => match key_event.code {
+                event::KeyCode::Char('j') => self.state.select_next(),
+                event::KeyCode::Char('k') => self.state.select_previous(),
+                event::KeyCode::Char('a') => {
+                    self.input_modal.clear();
+                    self.input_mode = InputMode::Editing;
+                }
+                _ => return Ok(HandleEventResult::Skipped),
+            },
         }
 
         Ok(HandleEventResult::Processing)
     }
+
     fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
         let label = Span::raw(self.label.clone());
         let tag_style = Style::default().fg(ratatui::style::Color::LightRed);
