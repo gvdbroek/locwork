@@ -48,14 +48,9 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
     };
 
     let debug_panel = DebugPanel {
-        title: "calendar".to_string(),
+        title: "Debug panel".to_string(),
     };
-    let mut location_panel = LocationsPanel::new();
-    // let mut location_panel = LocationsPanel {
-    //     title: "location".to_string(),
-    //     locations: Vec::new(),
-    // };
-    // location_panel.reload();
+    let location_panel = LocationsPanel::new();
 
     context
         .panels
