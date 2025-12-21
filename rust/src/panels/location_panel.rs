@@ -1,5 +1,7 @@
-use color_eyre::eyre::{Error, Result};
-use crossterm::event::{self, Event, KeyEvent};
+use std::sync::Arc;
+
+use color_eyre::eyre::Result;
+use crossterm::event::{self, KeyEvent};
 use ratatui::{
     Frame,
     style::{Modifier, Style, Stylize},
@@ -12,7 +14,7 @@ use crate::{
         HandleEventResult,
         panel::{InputModal, InputMode, InputModelInputResult, Panel},
     },
-    store::{self, Location},
+    store::{self, Location, Store},
 };
 
 #[derive(PartialEq, Eq, Hash)]
@@ -29,10 +31,11 @@ pub struct LocationsPanel {
     state: ListState,
     input_mode: InputMode,
     input_modal: InputModal,
+    store: Arc<Store>,
 }
 
 impl LocationsPanel {
-    pub fn new() -> Self {
+    pub fn new(store: Arc<Store>) -> Self {
         let locations = store::get_locations().unwrap();
         let mut base = LocationsPanel {
             label: "Locations".to_string(),
@@ -41,6 +44,7 @@ impl LocationsPanel {
             state: ListState::default(),
             input_mode: InputMode::Normal,
             input_modal: InputModal::new(),
+            store: store,
         };
         base.state.select_first();
         base

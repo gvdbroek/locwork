@@ -7,3 +7,5 @@ edition = "2024"
 color-eyre = "0.6.5"
 crossterm = "0.29.0"
 ratatui = "0.29.0"
+sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite", "tls-native-tls"] }
+tokio = { version = "1.48.0", features = ["full"] }

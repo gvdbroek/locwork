@@ -8,12 +8,16 @@ use ratatui::{
     layout::{Constraint, Layout, Rect},
 };
 use std::collections::HashMap;
+use std::sync::Arc;
 
-use crate::panels::{
-    HandleEventResult,
-    debugpanel::DebugPanel,
-    locationpanel::{LocationsPanel, PanelType},
-    panel::Panel,
+use crate::{
+    panels::{
+        HandleEventResult,
+        debug_panel::DebugPanel,
+        location_panel::{LocationsPanel, PanelType},
+        panel::Panel,
+    },
+    store::Store,
 };
 
 /// Context of app
@@ -25,28 +29,32 @@ pub struct Context {
 
 pub enum Pane {
     Status,
+    Location,
+    Calendar,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     color_eyre::install()?;
     let terminal = ratatui::init();
-    let result = run(terminal);
+    let result = run(terminal).await;
     ratatui::restore();
     result
 }
 
-fn run(mut terminal: DefaultTerminal) -> Result<()> {
+async fn run(mut terminal: DefaultTerminal) -> Result<()> {
     // init context and panels
     let mut context = Context {
         panels: HashMap::new(),
         rects: HashMap::new(),
         focussed: PanelType::Locations,
     };
+    let store = Arc::new(Store::new().await?);
 
     let debug_panel = DebugPanel {
         title: "Debug panel".to_string(),
     };
-    let location_panel = LocationsPanel::new();
+    let location_panel = LocationsPanel::new(store);
 
     context
         .panels
@@ -83,7 +91,6 @@ fn run(mut terminal: DefaultTerminal) -> Result<()> {
         })?;
 
         // logic
-
         let active_panel = context.panels.get_mut(&context.focussed).unwrap();
         let mut active_panel_result: HandleEventResult = HandleEventResult::Skipped;
         if active_panel_result == HandleEventResult::Skipped {
