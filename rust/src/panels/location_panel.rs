@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{clone, sync::Arc};
 
 use color_eyre::eyre::Result;
 use crossterm::event::{self, KeyEvent};
@@ -35,8 +35,8 @@ pub struct LocationsPanel {
 }
 
 impl LocationsPanel {
-    pub fn new(store: Arc<Store>) -> Self {
-        let locations = store::get_locations().unwrap();
+    pub async fn new(store: Arc<Store>) -> Self {
+        let locations = store.get_locations().await.unwrap();
         let mut base = LocationsPanel {
             label: "Locations".to_string(),
             locations: locations,
@@ -50,8 +50,10 @@ impl LocationsPanel {
         base
     }
 
-    pub fn reload(&mut self) -> Result<(), ()> {
-        self.locations = store::get_locations().unwrap();
+    pub async fn reload(&mut self) -> Result<(), ()> {
+        // let store_clone = Arc::clone(&self.store);
+        self.locations = self.store.get_locations().await.unwrap();
+        // self.locations = store_clone.get_locations().unwrap();
         Ok(())
     }
 }
@@ -68,8 +70,21 @@ impl Panel for LocationsPanel {
                     }
                     InputModelInputResult::Confirmed => {
                         self.input_mode = InputMode::Normal;
+                        let store_clone = Arc::clone(&self.store);
+                        let v = self.input_modal.input.clone();
+                        if v.len() == 0 {
+                            panic!();
+                        }
+                        tokio::spawn(async move {
+                            let _ = store_clone.add_location(v, None).await;
+                        });
+                        self.locations.push(Location {
+                            id: 0,
+                            name: self.input_modal.input.clone(),
+                            tag: "".to_string(),
+                        });
                         self.input_modal.clear();
-                        store::add_location(self.input_modal.input.clone(), None)?;
+
                         return Ok(HandleEventResult::Skipped);
                     }
                 },
@@ -78,6 +93,16 @@ impl Panel for LocationsPanel {
             InputMode::Normal => match key_event.code {
                 event::KeyCode::Char('j') => self.state.select_next(),
                 event::KeyCode::Char('k') => self.state.select_previous(),
+                event::KeyCode::Char('d') => {
+                    let selected_location_id = self.state.selected().unwrap();
+                    let element = self.locations.remove(selected_location_id);
+                    let store_clone = Arc::clone(&self.store);
+                    tokio::spawn(async move {
+                        store_clone
+                            .delete_location_by_name(element.name.as_str())
+                            .await
+                    });
+                }
                 event::KeyCode::Char('a') => {
                     self.input_modal.clear();
                     self.input_mode = InputMode::Editing;

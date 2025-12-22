@@ -1,9 +1,9 @@
 use color_eyre::Result;
-use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
-#[derive(Clone, PartialEq, Eq, Debug)]
+use sqlx::{SqlitePool, prelude::FromRow, sqlite::SqlitePoolOptions};
 
+#[derive(Clone, PartialEq, Eq, Debug, FromRow)]
 pub struct Location {
-    pub id: u64,
+    pub id: i64,
     pub name: String,
     pub tag: String,
 }
@@ -15,41 +15,59 @@ pub struct Store {
 
 impl Store {
     pub async fn new() -> Result<Self> {
+        // TODO: read  connection_url from DATABASE_URL env var?
         return Ok(Store {
             connection_url: ":memory:".to_string(),
             pool: SqlitePoolOptions::new()
                 .max_connections(2)
-                .connect(":memory:")
+                .connect("sqlite://dev.db")
                 .await?,
         });
     }
-}
 
-pub fn get_locations() -> Result<Vec<Location>> {
-    let locations: Vec<Location> = vec![
-        Location {
-            id: 1,
-            name: "home".to_string(),
-            tag: "home".to_string(),
-        },
-        Location {
-            id: 2,
-            name: "office".to_string(),
-            tag: "office".to_string(),
-        },
-        Location {
-            id: 3,
-            name: "OtherOffice".to_string(),
-            tag: "office".to_string(),
-        },
-    ];
-    Ok(locations)
-}
+    pub async fn get_locations(&self) -> Result<Vec<Location>> {
+        let rows: Vec<Location> = sqlx::query_as!(
+            Location,
+            r#"
+        SELECT
+            id AS "id!",
+            name AS "name!",
+            tag AS "tag!"
+        FROM Location"#
+        )
+        .fetch_all(&self.pool)
+        .await?;
 
-pub fn add_location(name: String, tag: Option<String>) -> Result<()> {
-    let location: Location = Location {
-        name: name,
-        tag: tag.unwrap_or("".to_string()),
-    };
-    todo!();
+        return Ok(rows);
+    }
+
+    pub async fn delete_location_by_name(&self, name: &str) -> Result<()> {
+        let _ = sqlx::query_as!(
+            Location,
+            r#"
+        DELETE from Location
+            WHERE name = ?"#,
+            name
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn add_location(&self, name: String, tag: Option<String>) -> Result<Location> {
+        let utag = tag.unwrap_or("".to_string());
+        let row: Location = sqlx::query_as!(
+            Location,
+            r#"
+                INSERT INTO Location (name, tag)
+                VALUES (?, ?)
+                RETURNING id as "id!", name as "name!", tag as "tag!"
+                "#,
+            name,
+            utag
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        return Ok(row);
+    }
 }

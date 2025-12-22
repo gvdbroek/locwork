@@ -54,7 +54,7 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
     let debug_panel = DebugPanel {
         title: "Debug panel".to_string(),
     };
-    let location_panel = LocationsPanel::new(store);
+    let location_panel = LocationsPanel::new(store).await;
 
     context
         .panels

@@ -73,6 +73,9 @@ impl InputModal {
             None => (),
         }
 
+        if key_event.code.is_backspace() {
+            self.delete_char();
+        }
         if key_event.code.is_esc() {
             return Ok(InputModelInputResult::Cancelled);
         }
