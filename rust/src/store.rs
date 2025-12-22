@@ -47,5 +47,9 @@ pub fn get_locations() -> Result<Vec<Location>> {
 }
 
 pub fn add_location(name: String, tag: Option<String>) -> Result<()> {
+    let location: Location = Location {
+        name: name,
+        tag: tag.unwrap_or("".to_string()),
+    };
     todo!();
 }
