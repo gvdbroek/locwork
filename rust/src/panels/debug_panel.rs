@@ -1,8 +1,8 @@
 use color_eyre::eyre::Result;
-use crossterm::event::{Event, KeyEvent};
+use crossterm::event::KeyEvent;
 use ratatui::{Frame, style::Style, text::Span, widgets::Block};
 
-use crate::panels::{HandleEventResult, Panel};
+use crate::panels::{Action, Panel};
 
 pub struct DebugPanel {
     pub title: String,
@@ -19,7 +19,7 @@ impl Panel for DebugPanel {
         frame.render_widget(block, area);
         frame.render_widget(span, inner);
     }
-    fn handle_input(&mut self, key: KeyEvent) -> Result<HandleEventResult> {
-        Ok(HandleEventResult::Skipped)
+    fn handle_input(&mut self, _key: KeyEvent) -> Option<Action> {
+        None
     }
 }
