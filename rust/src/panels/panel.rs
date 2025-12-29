@@ -1,4 +1,3 @@
-use color_eyre::Result;
 use crossterm::event::KeyEvent;
 use ratatui::{Frame, style::Style, text::Span, widgets::Block};
 
@@ -26,6 +25,7 @@ pub enum Action {
     ConfirmAddLocation(String),
     DeleteLocation(String),
     AddLocationDbSuccess(Vec<Location>),
+    DeleteLocationDbSuccess(Vec<Location>),
     Processing,
     Skipped,
 }

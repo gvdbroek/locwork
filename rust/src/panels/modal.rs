@@ -1,4 +1,3 @@
-use color_eyre::Result;
 use crossterm::event::KeyEvent;
 use ratatui::widgets::{Clear, Paragraph};
 use ratatui::{Frame, widgets::Block};

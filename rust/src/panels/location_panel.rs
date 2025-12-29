@@ -1,9 +1,3 @@
-use std::{
-    clone,
-    sync::{Arc, mpsc::Sender},
-};
-
-use color_eyre::eyre::Result;
 use crossterm::event::{self, KeyEvent};
 use ratatui::{
     Frame,
@@ -13,12 +7,8 @@ use ratatui::{
 };
 
 use crate::{
-    panels::{
-        Action,
-        modal::{AddLocationModal, InputModalResult, InputMode},
-        panel::Panel,
-    },
-    store::{Location, Store},
+    panels::{Action, panel::Panel},
+    store::Location,
 };
 
 #[derive(PartialEq, Eq, Hash)]
@@ -33,7 +23,6 @@ pub struct LocationsPanel {
     pub locations: Vec<Location>,
     pub tag: String,
     state: ListState,
-    input_mode: InputMode,
 }
 
 impl LocationsPanel {
@@ -43,16 +32,9 @@ impl LocationsPanel {
             locations: locations,
             tag: " ¹".to_string(),
             state: ListState::default(),
-            input_mode: InputMode::Normal,
         };
         base.state.select_first();
         base
-    }
-
-    pub async fn reload(&mut self) -> Result<(), ()> {
-        // let store_clone = Arc::clone(&self.store);
-        // self.locations = self.store.get_locations().await.unwrap();
-        Ok(())
     }
 }
 
@@ -110,9 +92,5 @@ impl Panel for LocationsPanel {
         }
 
         frame.render_widget(block, area);
-        // // draw on top
-        // if self.input_mode == InputMode::Editing {
-        //     self.input_modal.render(frame);
-        // }
     }
 }

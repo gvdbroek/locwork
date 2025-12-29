@@ -9,7 +9,6 @@ pub struct Location {
 }
 
 pub struct Store {
-    connection_url: String,
     pool: SqlitePool,
 }
 
@@ -17,7 +16,6 @@ impl Store {
     pub async fn new() -> Result<Self> {
         // TODO: read  connection_url from DATABASE_URL env var?
         return Ok(Store {
-            connection_url: ":memory:".to_string(),
             pool: SqlitePoolOptions::new()
                 .max_connections(2)
                 .connect("sqlite://dev.db")
@@ -29,11 +27,12 @@ impl Store {
         let rows: Vec<Location> = sqlx::query_as!(
             Location,
             r#"
-        SELECT
-            id AS "id!",
-            name AS "name!",
-            tag AS "tag!"
-        FROM Location"#
+                SELECT
+                id AS "id!",
+                name AS "name!",
+                tag AS "tag!"
+                FROM Location
+            "#
         )
         .fetch_all(&self.pool)
         .await?;
@@ -45,8 +44,9 @@ impl Store {
         let _ = sqlx::query_as!(
             Location,
             r#"
-        DELETE from Location
-            WHERE name = ?"#,
+                DELETE from Location
+                WHERE name = ?
+            "#,
             name
         )
         .fetch_optional(&self.pool)
@@ -62,7 +62,7 @@ impl Store {
                 INSERT INTO Location (name, tag)
                 VALUES (?, ?)
                 RETURNING id as "id!", name as "name!", tag as "tag!"
-                "#,
+            "#,
             name,
             utag
         )

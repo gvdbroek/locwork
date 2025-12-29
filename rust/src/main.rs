@@ -6,7 +6,7 @@ use color_eyre::Result;
 use crossterm::event::{self, Event, EventStream};
 use futures_util::StreamExt;
 use ratatui::{
-    DefaultTerminal, Frame,
+    DefaultTerminal,
     layout::{Constraint, Layout, Rect},
 };
 use std::collections::HashMap;
@@ -20,7 +20,7 @@ use crate::{
         modal::{ActiveModal, AddLocationModal, InputModalResult},
         panel::Panel,
     },
-    store::{Location, Store},
+    store::Store,
 };
 
 /// Context of app
@@ -37,9 +37,27 @@ impl Context {
             Action::CancelModal => {
                 self.active_modal = ActiveModal::None;
             }
-            Action::AddLocation(m) => {
+            Action::AddLocation(_m) => {
                 self.active_modal = ActiveModal::AddLocation(AddLocationModal::new());
             }
+            Action::DeleteLocation(name) => {
+                let tx_clone = tx.clone();
+                let store_clone = Arc::clone(&store);
+                tokio::spawn(async move {
+                    if let Ok(_) = store_clone.delete_location_by_name(name.as_str()).await {
+                        let locations = store_clone.get_locations().await.unwrap();
+                        let _ = tx_clone
+                            .send(Action::DeleteLocationDbSuccess(locations))
+                            .await;
+                    }
+                });
+            }
+            Action::AddLocationDbSuccess(ref _locations) => {
+                if let Some(panel) = self.panels.get_mut(&PanelType::Locations) {
+                    panel.update(&action);
+                }
+            }
+
             Action::ConfirmAddLocation(name) => {
                 self.active_modal = ActiveModal::None;
                 let tx_clone = tx.clone();
@@ -51,12 +69,12 @@ impl Context {
                     }
                 });
             }
-            Action::AddLocationDbSuccess(ref locations) => {
+            Action::DeleteLocationDbSuccess(ref _locations) => {
+                // TODO: merge with AddLocationDBSuccess -> LocationDbUpdated
                 if let Some(panel) = self.panels.get_mut(&PanelType::Locations) {
                     panel.update(&action);
                 }
             }
-            Action::DeleteLocation(name) => {}
             Action::Skipped => {}
             Action::Processing => {}
         }
@@ -94,7 +112,6 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
     };
     let locations = &store.get_locations().await.unwrap();
     let location_panel = LocationsPanel::new(locations.clone()).await;
-    let mut modal = AddLocationModal::new();
 
     state
         .panels
@@ -181,8 +198,4 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
                 }
         }
     }
-}
-
-fn render(frame: &mut Frame) {
-    frame.render_widget("hello world", frame.area());
 }
