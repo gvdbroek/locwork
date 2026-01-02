@@ -8,6 +8,11 @@ pub struct Location {
     pub tag: String,
 }
 
+#[derive(Clone, PartialEq, Eq, Debug, FromRow)]
+pub struct Record {
+    pub id: i64,
+}
+
 pub struct Store {
     pool: SqlitePool,
 }

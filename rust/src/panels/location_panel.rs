@@ -11,13 +11,6 @@ use crate::{
     store::Location,
 };
 
-#[derive(PartialEq, Eq, Hash)]
-pub enum PanelType {
-    Calendar,
-    Status,
-    Locations,
-}
-
 pub struct LocationsPanel {
     pub label: String,
     pub locations: Vec<Location>,

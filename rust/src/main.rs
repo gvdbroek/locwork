@@ -14,9 +14,10 @@ use std::sync::Arc;
 
 use crate::{
     panels::{
-        Action,
+        Action, PanelType,
+        calendar_panel::CalendarPanel,
         debug_panel::DebugPanel,
-        location_panel::{LocationsPanel, PanelType},
+        location_panel::LocationsPanel,
         modal::{ActiveModal, AddLocationModal, InputModalResult},
         panel::Panel,
     },
@@ -75,6 +76,14 @@ impl Context {
                     panel.update(&action);
                 }
             }
+            Action::StartNavigateDate(_date) => {}
+            Action::LoadNavigateDateSuccess(ref dates) => {
+                // TODO: Update Calendar, load new dates
+                if let Some(panel) = self.panels.get_mut(&PanelType::Calendar) {
+                    panel.update(&action);
+                }
+                // TODO: Update statistics Panel
+            }
             Action::Skipped => {}
             Action::Processing => {}
         }
@@ -100,7 +109,7 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
     let mut state = Context {
         panels: HashMap::new(),
         rects: HashMap::new(),
-        focussed: PanelType::Locations,
+        focussed: PanelType::Calendar,
         active_modal: ActiveModal::None,
     };
     let store = Arc::new(Store::new().await?);
@@ -110,12 +119,13 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
     let debug_panel = DebugPanel {
         title: "Debug panel".to_string(),
     };
+    let calendar_panel = CalendarPanel::new(None).await;
     let locations = &store.get_locations().await.unwrap();
     let location_panel = LocationsPanel::new(locations.clone()).await;
 
     state
         .panels
-        .insert(PanelType::Calendar, Box::new(debug_panel));
+        .insert(PanelType::Calendar, Box::new(calendar_panel));
     state
         .panels
         .insert(PanelType::Locations, Box::new(location_panel));

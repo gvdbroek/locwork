@@ -1,7 +1,17 @@
 use crossterm::event::KeyEvent;
 use ratatui::{Frame, style::Style, text::Span, widgets::Block};
+use time::Date;
 
-use crate::{panels::modal::LocationModalState, store::Location};
+use crate::{
+    panels::modal::LocationModalState,
+    store::{Location, Record},
+};
+#[derive(PartialEq, Eq, Hash)]
+pub enum PanelType {
+    Calendar,
+    Status,
+    Locations,
+}
 
 pub trait Panel {
     fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, focussed: bool) {
@@ -26,6 +36,8 @@ pub enum Action {
     DeleteLocation(String),
     AddLocationDbSuccess(Vec<Location>),
     DeleteLocationDbSuccess(Vec<Location>),
+    StartNavigateDate(Date),
+    LoadNavigateDateSuccess(Vec<Record>),
     Processing,
     Skipped,
 }
