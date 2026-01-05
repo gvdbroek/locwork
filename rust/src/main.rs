@@ -99,6 +99,7 @@ pub enum Pane {
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
+
     let terminal = ratatui::init();
     let result = run(terminal).await;
     ratatui::restore();
@@ -113,6 +114,7 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
         active_modal: ActiveModal::None,
     };
     let store = Arc::new(Store::new().await?);
+
     let (tsender, mut treceiver) = channel::<Action>(128);
     let mut reader = EventStream::new();
 

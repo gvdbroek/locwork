@@ -1,5 +1,14 @@
+use std::{
+    fs::{self, exists},
+    path::PathBuf,
+};
+
 use color_eyre::Result;
-use sqlx::{SqlitePool, prelude::FromRow, sqlite::SqlitePoolOptions};
+use sqlx::{
+    SqlitePool,
+    prelude::FromRow,
+    sqlite::{SqliteConnectOptions, SqlitePoolOptions},
+};
 
 #[derive(Clone, PartialEq, Eq, Debug, FromRow)]
 pub struct Location {
@@ -16,16 +25,34 @@ pub struct Record {
 pub struct Store {
     pool: SqlitePool,
 }
+fn get_db_path() -> PathBuf {
+    let dirs = directories::ProjectDirs::from("be", "waystone", "locwork").unwrap();
+    let mut config_dir = dirs.config_dir().to_path_buf();
+    config_dir.push("app.db");
+    // makes config dir ~/.config/locwork/app.db
+    config_dir
+}
 
 impl Store {
     pub async fn new() -> Result<Self> {
         // TODO: read  connection_url from DATABASE_URL env var?
-        return Ok(Store {
-            pool: SqlitePoolOptions::new()
-                .max_connections(2)
-                .connect("sqlite://dev.db")
-                .await?,
-        });
+        let parent_folder = get_db_path().parent().unwrap().to_owned();
+        if !fs::exists(&parent_folder).unwrap() {
+            fs::create_dir_all(parent_folder).unwrap();
+        }
+        let ops = SqliteConnectOptions::new()
+            .filename(get_db_path())
+            .create_if_missing(true);
+
+        let store = Store {
+            pool: SqlitePool::connect_with(ops).await?,
+        };
+        sqlx::migrate!("./migrations")
+            .run(&store.pool)
+            .await
+            .unwrap();
+
+        Ok(store)
     }
 
     pub async fn get_locations(&self) -> Result<Vec<Location>> {
