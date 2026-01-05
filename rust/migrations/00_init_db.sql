@@ -1,4 +1,4 @@
-CREATE TABLE Location (
+CREATE TABLE IF NOT EXISTS Location (
     id BIGINT PRIMARY KEY,
     name TEXT NOT NULL,
     tag TEXT
