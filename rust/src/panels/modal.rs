@@ -6,8 +6,8 @@ use ratatui::{Frame, widgets::Block};
 pub struct AddLocationModal {
     pub input: String,
     character_index: usize,
-    input_mode: InputMode,
 }
+
 #[derive(Eq, PartialEq)]
 pub enum InputModalResult {
     Editting,
@@ -15,16 +15,12 @@ pub enum InputModalResult {
     Confirmed(String),
 }
 
-#[derive(Eq, PartialEq)]
-pub enum InputMode {
-    Normal,
-    Editing,
-}
-
 #[derive(Eq, PartialEq, Default)]
+/// The value provided by the LocationModal
 pub struct LocationModalState {
     pub text: String,
 }
+
 pub enum ActiveModal {
     None,
     AddLocation(AddLocationModal),
@@ -34,7 +30,6 @@ impl AddLocationModal {
     // https://ratatui.rs/examples/apps/user_input/
     pub const fn new() -> Self {
         Self {
-            input_mode: InputMode::Editing,
             input: String::new(),
             character_index: 0,
         }
