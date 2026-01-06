@@ -1,26 +1,11 @@
+use crate::store::{Location, LogType, Record};
+use color_eyre::Result;
+use sqlx::{SqlitePool, sqlite::SqliteConnectOptions};
 use std::{
-    fs::{self, exists},
+    fs::{self},
     path::PathBuf,
 };
-
-use color_eyre::Result;
-use sqlx::{
-    SqlitePool,
-    prelude::FromRow,
-    sqlite::{SqliteConnectOptions, SqlitePoolOptions},
-};
-
-#[derive(Clone, PartialEq, Eq, Debug, FromRow)]
-pub struct Location {
-    pub id: i64,
-    pub name: String,
-    pub tag: String,
-}
-
-#[derive(Clone, PartialEq, Eq, Debug, FromRow)]
-pub struct Record {
-    pub id: i64,
-}
+use time::Date;
 
 pub struct Store {
     pool: SqlitePool,
@@ -101,5 +86,31 @@ impl Store {
         .fetch_one(&self.pool)
         .await?;
         return Ok(row);
+    }
+
+    pub async fn add_record(
+        &self,
+        date: Date,
+        log_type: LogType,
+        location: Location,
+    ) -> Result<Record> {
+        let inserted: Record = sqlx::query_as!(
+            Record,
+            r#"
+            INSERT INTO Record (date, location_id, log_type)
+            VALUES (?, ?, ?)
+            RETURNING 
+                id as "id!",
+                date as "date: Date", 
+                location_id as "location_id!",
+                log_type as "log_type: LogType"
+            "#,
+            date,
+            location.id,
+            log_type,
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(inserted)
     }
 }

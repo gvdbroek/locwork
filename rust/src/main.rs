@@ -118,9 +118,9 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
     let (tsender, mut treceiver) = channel::<Action>(128);
     let mut reader = EventStream::new();
 
-    let debug_panel = DebugPanel {
-        title: "Debug panel".to_string(),
-    };
+    // let debug_panel = DebugPanel {
+    //     title: "Debug panel".to_string(),
+    // };
     let calendar_panel = CalendarPanel::new(None).await;
     let locations = &store.get_locations().await.unwrap();
     let location_panel = LocationsPanel::new(locations.clone()).await;
