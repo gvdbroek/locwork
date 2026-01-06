@@ -1,5 +1,18 @@
 CREATE TABLE IF NOT EXISTS Location (
-    id BIGINT PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
-    tag TEXT
+    tag TEXT 
 );
+
+CREATE TABLE IF NOT EXISTS Record (
+    id INTEGER PRIMARY KEY,
+    location_id INTEGER NOT NULL,	
+    log_type INTEGER NOT NULL,
+    date INTEGER NOT NULL,
+
+	CONSTRAINT fk_location
+	FOREIGN KEY(location_id)
+	REFERENCES Location(id)
+	ON DELETE CASCADE
+);
+
