@@ -1,6 +1,7 @@
 use crossterm::event::KeyEvent;
 use ratatui::{
     Frame,
+    layout::Rect,
     widgets::{Block, Clear, Paragraph},
 };
 
@@ -12,6 +13,7 @@ pub struct TextFieldState {
 pub struct TextField {
     state: TextFieldState,
     character_index: usize,
+    label: String,
 }
 
 pub enum TextFieldResult {
@@ -22,10 +24,11 @@ pub enum TextFieldResult {
 
 impl TextField {
     // https://ratatui.rs/examples/apps/user_input/
-    pub fn new() -> Self {
+    pub fn new(label: String) -> Self {
         Self {
             state: TextFieldState::default(),
             character_index: 0,
+            label: label,
         }
     }
     pub fn clear(&mut self) {
@@ -108,15 +111,13 @@ impl TextField {
     }
 
     pub fn submit_message(&mut self) {
-        // self.messages.push(self.input.clone());
         self.state.value.clear();
         self.reset_cursor();
     }
 
-    pub fn render(&self, frame: &mut Frame) {
-        let area = frame.area();
+    pub fn render(&self, frame: &mut Frame, area: Rect) {
         let input = Paragraph::new(self.state.value.as_str())
-            .block(Block::bordered().title("Add new Location"));
+            .block(Block::bordered().title(self.label.clone()));
         frame.render_widget(Clear, area);
         frame.render_widget(input, area);
     }
