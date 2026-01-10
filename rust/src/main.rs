@@ -99,7 +99,6 @@ pub enum Pane {
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
-
     let terminal = ratatui::init();
     let result = run(terminal).await;
     ratatui::restore();
