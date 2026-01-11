@@ -10,7 +10,7 @@ use ratatui::{
 use time::{Date, Duration, Month, OffsetDateTime, Weekday};
 
 use crate::{
-    panels::{Action, Panel},
+    panels::{Action, Panel, record_modal::RecordModalData},
     store::Record,
 };
 
@@ -45,7 +45,7 @@ impl Panel for CalendarPanel {
         }
     }
 
-    fn handle_input(&mut self, key_event: crossterm::event::KeyEvent) -> Option<super::Action> {
+    fn handle_input(&mut self, key_event: crossterm::event::KeyEvent) -> Option<Action> {
         match key_event.code {
             // Move to days
             event::KeyCode::Char('j') => self.selected = bound_date_offset(self.selected, 7),
@@ -66,7 +66,13 @@ impl Panel for CalendarPanel {
             // Today
             event::KeyCode::Char('t') => self.selected = OffsetDateTime::now_utc().date(),
             event::KeyCode::Char('D') => {}
-            event::KeyCode::Char('A') => {}
+            event::KeyCode::Char('A') => {
+                return Some(Action::AddRecord(RecordModalData {
+                    location: "asdasd".to_string(),
+                    log_type: crate::store::LogType::Work,
+                    date: self.selected,
+                }));
+            }
             _ => return None,
         }
         Some(Action::Processing)
@@ -98,7 +104,7 @@ impl Panel for CalendarPanel {
         let today_style = Style::default().add_modifier(Modifier::UNDERLINED);
         let surrounding = Style::default().dark_gray();
         let cal_headers = Style::default().bold();
-        let holiday_style = Style::default().fg(Color::LightMagenta);
+        let _holiday_style = Style::default().fg(Color::LightMagenta);
         let selected_style = Style::default().bg(Color::Red);
         let weekend_style = Style::default().dark_gray();
         let future_style = Style::default().fg(Color::Rgb(100, 100, 100));

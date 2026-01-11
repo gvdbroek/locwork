@@ -16,10 +16,11 @@ use crate::{
     panels::{
         Action, PanelType,
         calendar_panel::CalendarPanel,
-        debug_panel::DebugPanel,
+        location_modal::{AddLocationModal, InputModalResult},
         location_panel::LocationsPanel,
-        modal::{ActiveModal, AddLocationModal, InputModalResult},
+        modal::ActiveModal,
         panel::Panel,
+        record_modal::{AddRecordModal, RecordModalResult},
     },
     store::Store,
 };
@@ -77,12 +78,16 @@ impl Context {
                 }
             }
             Action::StartNavigateDate(_date) => {}
-            Action::LoadNavigateDateSuccess(ref dates) => {
+            Action::LoadNavigateDateSuccess(ref _dates) => {
                 // TODO: Update Calendar, load new dates
                 if let Some(panel) = self.panels.get_mut(&PanelType::Calendar) {
                     panel.update(&action);
                 }
                 // TODO: Update statistics Panel
+            }
+            Action::AddRecord(_data) => {
+                let new_modal = AddRecordModal::new(_data.date);
+                self.active_modal = ActiveModal::AddRecord(new_modal);
             }
             Action::Skipped => {}
             Action::Processing => {}
@@ -154,9 +159,12 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
                     panel.render(frame, *rect, state.focussed == *pane_type);
                 }
             }
+            let active_rect = *state.rects.get(&state.focussed).unwrap();
+
             match &state.active_modal {
                 ActiveModal::None => {}
-                ActiveModal::AddLocation(modal) => modal.render(frame),
+                ActiveModal::AddLocation(modal) => modal.render(frame, active_rect),
+                ActiveModal::AddRecord(modal) => modal.render(frame, active_rect),
             }
         })?;
 
@@ -174,10 +182,23 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
                                         InputModalResult::Cancelled => {Some(Action::CancelModal)}
                                         InputModalResult::Confirmed(t) => {Some(Action::ConfirmAddLocation(t))}
                                     };
-                                    a
+                                a
                                 }
                                 else{
                                     None
+                                }
+                            },
+                            ActiveModal::AddRecord(_m) =>{
+                                if let Some(res) = _m.handle_input(key) {
+                                    let a: Option<Action> = match res{
+                                        RecordModalResult::Confirmed(_data) => {todo!()}
+                                        RecordModalResult::Cancelled => {Some(Action::CancelModal)}
+                                    };
+                                a
+                                }
+                                else{
+                                    None
+
                                 }
                             },
                             ActiveModal::None => {

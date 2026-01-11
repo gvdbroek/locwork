@@ -3,7 +3,10 @@ use ratatui::{Frame, style::Style, text::Span, widgets::Block};
 use time::Date;
 
 use crate::{
-    panels::modal::LocationModalState,
+    panels::{
+        location_modal::LocationModalState,
+        record_modal::{AddRecordModal, RecordModalData},
+    },
     store::{Location, Record},
 };
 #[derive(PartialEq, Eq, Hash)]
@@ -36,8 +39,10 @@ pub enum Action {
     DeleteLocation(String),
     AddLocationDbSuccess(Vec<Location>),
     DeleteLocationDbSuccess(Vec<Location>),
+
     StartNavigateDate(Date),
     LoadNavigateDateSuccess(Vec<Record>),
+    AddRecord(RecordModalData),
     Processing,
     Skipped,
 }

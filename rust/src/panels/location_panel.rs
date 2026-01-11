@@ -7,7 +7,7 @@ use ratatui::{
 };
 
 use crate::{
-    panels::{Action, panel::Panel},
+    panels::{Action, location_modal::LocationModalState, panel::Panel},
     store::Location,
 };
 
@@ -42,9 +42,7 @@ impl Panel for LocationsPanel {
                 return Some(Action::DeleteLocation(element.name));
             }
             event::KeyCode::Char('A') => {
-                return Some(Action::AddLocation(
-                    crate::panels::modal::LocationModalState::default(),
-                ));
+                return Some(Action::AddLocation(LocationModalState::default()));
             }
             _ => return None,
         }

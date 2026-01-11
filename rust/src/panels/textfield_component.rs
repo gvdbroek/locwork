@@ -7,11 +7,16 @@ use ratatui::{
 
 #[derive(Default, Clone)]
 pub struct TextFieldState {
-    value: String,
+    pub value: String,
+}
+impl TextFieldState {
+    pub fn new(initial_value: Option<String>) -> Self {
+        initial_value.map(|v| Self { value: v }).unwrap_or_default()
+    }
 }
 
 pub struct TextField {
-    state: TextFieldState,
+    pub state: TextFieldState,
     character_index: usize,
     label: String,
 }
@@ -24,9 +29,9 @@ pub enum TextFieldResult {
 
 impl TextField {
     // https://ratatui.rs/examples/apps/user_input/
-    pub fn new(label: String) -> Self {
+    pub fn new(label: String, initial_value: Option<String>) -> Self {
         Self {
-            state: TextFieldState::default(),
+            state: TextFieldState::new(initial_value),
             character_index: 0,
             label: label,
         }
@@ -104,15 +109,6 @@ impl TextField {
 
     fn clamp_cursor(&self, new_cursor_pos: usize) -> usize {
         new_cursor_pos.clamp(0, self.state.value.chars().count())
-    }
-
-    fn reset_cursor(&mut self) {
-        self.character_index = 0;
-    }
-
-    pub fn submit_message(&mut self) {
-        self.state.value.clear();
-        self.reset_cursor();
     }
 
     pub fn render(&self, frame: &mut Frame, area: Rect) {
