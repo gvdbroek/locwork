@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use sqlx::prelude::FromRow;
 use time::Date;
 
@@ -26,4 +28,19 @@ pub enum LogType {
     Sick = 4,
 }
 
-// impl From<i64> for LogType {}
+impl Display for LogType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+impl LogType {
+    pub fn names() -> Vec<String> {
+        vec![
+            LogType::Unknown.to_string(),
+            LogType::Work.to_string(),
+            LogType::Holiday.to_string(),
+            LogType::Vacation.to_string(),
+            LogType::Sick.to_string(),
+        ]
+    }
+}

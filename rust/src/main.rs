@@ -33,7 +33,7 @@ pub struct Context {
     pub active_modal: ActiveModal,
 }
 impl Context {
-    pub fn process_action(&mut self, action: Action, tx: Sender<Action>, store: Arc<Store>) {
+    pub async fn process_action(&mut self, action: Action, tx: Sender<Action>, store: Arc<Store>) {
         match action {
             Action::None => {}
             Action::CancelModal => {
@@ -59,7 +59,6 @@ impl Context {
                     panel.update(&action);
                 }
             }
-
             Action::ConfirmAddLocation(name) => {
                 self.active_modal = ActiveModal::None;
                 let tx_clone = tx.clone();
@@ -86,7 +85,8 @@ impl Context {
                 // TODO: Update statistics Panel
             }
             Action::AddRecord(_data) => {
-                let new_modal = AddRecordModal::new(_data.date);
+                let locations = store.get_locations().await.unwrap();
+                let new_modal = AddRecordModal::new(_data.date, locations);
                 self.active_modal = ActiveModal::AddRecord(new_modal);
             }
             Action::Skipped => {}
@@ -121,10 +121,6 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
 
     let (tsender, mut treceiver) = channel::<Action>(128);
     let mut reader = EventStream::new();
-
-    // let debug_panel = DebugPanel {
-    //     title: "Debug panel".to_string(),
-    // };
     let calendar_panel = CalendarPanel::new(None).await;
     let locations = &store.get_locations().await.unwrap();
     let location_panel = LocationsPanel::new(locations.clone()).await;
@@ -218,14 +214,14 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
 
                         // 2. Process Intent
                         if let Some(act) = action {
-                            state.process_action(act, tsender.clone(), store.clone());
+                            state.process_action(act, tsender.clone(), store.clone()).await;
                         }
                     }
                 }
                 maybe_bg_action = treceiver.recv() => {
                     if let Some(bg_action) = maybe_bg_action {
             // Process the refresh/success action sent from the tokio::spawn block
-            state.process_action(bg_action, tsender.clone(), store.clone());
+            state.process_action(bg_action, tsender.clone(), store.clone()).await;
         }
                 }
         }
