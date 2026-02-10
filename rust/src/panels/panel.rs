@@ -45,4 +45,5 @@ pub enum Action {
     AddRecord(RecordModalData),
     Processing,
     Skipped,
+    QuitApplication,
 }

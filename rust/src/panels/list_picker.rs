@@ -3,7 +3,7 @@ use ratatui::{
     Frame,
     layout::Rect,
     style::{Style, Stylize},
-    widgets::{List, ListState},
+    widgets::{Clear, List, ListState},
 };
 
 pub struct SimpleListPicker {
@@ -27,6 +27,11 @@ impl SimpleListPicker {
         }
     }
 
+    /// Select the default (first) item in the list
+    pub fn select_default(&mut self) {
+        self.list_widget.select_first();
+    }
+
     pub fn handle_input(&mut self, key_event: KeyEvent) -> SimpleListPickerResult {
         if key_event.code.is_esc() {
             return SimpleListPickerResult::Cancelled;
@@ -35,6 +40,9 @@ impl SimpleListPicker {
             return SimpleListPickerResult::Confirmed(self.selected.clone());
         }
         match key_event.code {
+            KeyCode::Char('q') => {
+                return SimpleListPickerResult::Cancelled;
+            } // up
             KeyCode::Char('k') => {
                 self.list_widget.select_previous();
                 return SimpleListPickerResult::Editting;
@@ -48,8 +56,10 @@ impl SimpleListPicker {
         };
     }
     pub fn render(&mut self, frame: &mut Frame, area: Rect) {
+        frame.render_widget(Clear, area);
+
         let list = List::new(self.values.clone())
-            .highlight_style(Style::new().reversed())
+            .highlight_style(Style::new().reversed().fg(ratatui::style::Color::Red))
             .repeat_highlight_symbol(true);
 
         frame.render_stateful_widget(list, area, &mut self.list_widget);

@@ -3,6 +3,7 @@ mod store;
 use tokio::sync::mpsc::{Sender, channel};
 
 use color_eyre::Result;
+use crossterm::event::KeyEvent;
 use crossterm::event::{self, Event, EventStream};
 use futures_util::StreamExt;
 use ratatui::{
@@ -91,6 +92,7 @@ impl Context {
             }
             Action::Skipped => {}
             Action::Processing => {}
+            Action::QuitApplication => panic!(),
         }
     }
 }
@@ -157,7 +159,7 @@ async fn run(mut terminal: DefaultTerminal) -> Result<()> {
             }
             let active_rect = *state.rects.get(&state.focussed).unwrap();
 
-            match &state.active_modal {
+            match &mut state.active_modal {
                 ActiveModal::None => {}
                 ActiveModal::AddLocation(modal) => modal.render(frame, active_rect),
                 ActiveModal::AddRecord(modal) => modal.render(frame, active_rect),

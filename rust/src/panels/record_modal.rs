@@ -1,14 +1,15 @@
-use std::io::StdoutLock;
-
 use crate::{
-    panels::{list_picker::SimpleListPicker, textfield_component::TextField},
+    panels::{
+        list_picker::SimpleListPicker, list_picker::SimpleListPickerResult,
+        textfield_component::TextField,
+    },
     store::{Location, LogType},
 };
 use crossterm::event::KeyEvent;
 use ratatui::{
     Frame,
     layout::{Constraint, Layout, Rect},
-    widgets::{Block, Clear, List, ListState, Paragraph},
+    widgets::{Block, Clear, ListState, Paragraph},
 };
 use time::Date;
 
@@ -26,7 +27,7 @@ pub enum RecordModalResult {
 }
 enum Dialog {
     None,
-    PickLocation,
+    PickLocation(SimpleListPicker),
 }
 
 pub struct AddRecordModal {
@@ -51,12 +52,46 @@ impl AddRecordModal {
             locations_widget_state: ListState::default(),
         };
         new_instance.date_field.state.value = date.to_string();
+        new_instance.locations_widget_state.select_first();
         new_instance
     }
 
     pub fn handle_input(&mut self, key_event: KeyEvent) -> Option<RecordModalResult> {
+        match &mut self.active_dialog {
+            Dialog::PickLocation(picker) => {
+                let list_res = picker.handle_input(key_event);
+                match list_res {
+                    SimpleListPickerResult::Cancelled => self.active_dialog = Dialog::None,
+                    SimpleListPickerResult::Editting => (),
+                    SimpleListPickerResult::Confirmed(choice) => todo!(),
+                }
+                return None;
+            }
+            Dialog::None => (),
+        };
         match key_event.code.as_char() {
-            Some(_c) => {}
+            Some(_c) => match _c {
+                // setup location
+                't' => todo!(),
+
+                // setup location
+                'l' => {
+                    let location_names = self.locations.iter().map(|l| l.name.clone()).collect();
+                    let mut picker = SimpleListPicker::new(location_names, None);
+                    picker.select_default();
+                    self.active_dialog = Dialog::PickLocation(picker)
+                }
+
+                // setup location
+                'q' => return Some(RecordModalResult::Cancelled),
+
+                // // dialog down
+                // 'j' => self.locations_widget_state.select_next(),
+                //
+                // // dialog up
+                // 'k' => self.locations_widget_state.select_previous(),
+                _ => return None,
+            },
             None => (),
         };
         if key_event.code.is_esc() {
@@ -64,7 +99,8 @@ impl AddRecordModal {
         }
         None
     }
-    pub fn render(&self, frame: &mut Frame, area: Rect) {
+
+    pub fn render(&mut self, frame: &mut Frame, area: Rect) {
         let page = Block::bordered().title("Add New Log");
         // let chunks = horizontal.split(page.inner(area));
         let inner_area = page.inner(area);
@@ -94,21 +130,15 @@ impl AddRecordModal {
         frame.render_widget(&location_paragraph, *locations_area);
 
         // types
-        let names = LogType::names().first().unwrap().clone();
-        let type_widget = Paragraph::new(names).block(Block::bordered().title("Type".to_string()));
+        let log_type_name = LogType::names().first().unwrap().clone();
+        let type_widget =
+            Paragraph::new(log_type_name).block(Block::bordered().title("Type".to_string()));
         frame.render_widget(type_widget, *type_area);
-        match &self.active_dialog {
+
+        match &mut self.active_dialog {
             Dialog::None => {}
-            Dialog::PickLocation => {
-                let loc_names: Vec<String> =
-                    self.locations.iter().map(|l| l.name.clone()).collect();
-                let list = List::new(loc_names);
-                frame.render_widget(Clear, inner_area);
-                frame.render_stateful_widget(
-                    list,
-                    inner_area,
-                    &mut self.locations_widget_state.clone(),
-                )
+            Dialog::PickLocation(picker) => {
+                picker.render(frame, inner_area);
             }
         }
     }
